@@ -1,5 +1,4 @@
-# ─── Base ─────────────────────────────────────────────────────────────
-FROM python:3.11-slim AS base
+FROM python:3.11-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -7,12 +6,6 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
     DEBIAN_FRONTEND=noninteractive
 
-# ─── System deps ──────────────────────────────────────────────────────
-# libgomp1        — OpenMP для некоторых сборок (rlottie)
-# libfreetype6    — рендер шрифтов через Pillow
-# fonts-dejavu    — базовые шрифты (fallback, если CDN недоступен)
-# build-essential, cmake — нужны для сборки rlottie-python и svgelements
-# libgl1, libglib2.0-0 — Pillow может тянуть графические либы
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
         cmake \
@@ -28,24 +21,22 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-# ─── Python deps (кэшируем отдельно от кода) ─────────────────────────
 COPY requirements.txt .
 RUN pip install --upgrade pip && \
     pip install -r requirements.txt
 
-# ─── Code ─────────────────────────────────────────────────────────────
+# Копируем ВСЁ, включая static/index.html
 COPY . .
 
-# Директории для данных и загрузок
-RUN mkdir -p data/uploads/svg data/uploads/fonts static
+# Явная проверка, что index.html на месте
+RUN test -f /app/static/index.html || (echo "FATAL: static/index.html не найден в build context!" && exit 1) && \
+    echo "OK: static/index.html присутствует" && \
+    ls -la /app/static/
 
-# ─── Healthcheck ──────────────────────────────────────────────────────
-HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-    CMD curl -fsS http://127.0.0.1:${PORT:-4263}/api/templates || exit 1
+RUN mkdir -p data/uploads/svg data/uploads/fonts
 
-# ─── Runtime ──────────────────────────────────────────────────────────
-# supervisor запускает uvicorn + bot.py в одном контейнере
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+    CMD curl -fsS http://127.0.0.1:${PORT:-4263}/health || exit 1
 
 EXPOSE 4263
 
