@@ -25,15 +25,14 @@ COPY requirements.txt .
 RUN pip install --upgrade pip && \
     pip install -r requirements.txt
 
-# Копируем ВСЁ, включая static/index.html
 COPY . .
 
-# Явная проверка, что index.html на месте
-RUN test -f /app/static/index.html || (echo "FATAL: static/index.html не найден в build context!" && exit 1) && \
-    echo "OK: static/index.html присутствует" && \
-    ls -la /app/static/
+# <<< ВОТ ЭТА СТРОКА БЫЛА ПОТЕРЯНА В ПРОШЛЫЙ РАЗ >>>
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-RUN mkdir -p data/uploads/svg data/uploads/fonts
+RUN test -f /app/static/index.html || (echo "FATAL: static/index.html не найден!" && exit 1) && \
+    echo "OK: static/index.html присутствует" && \
+    mkdir -p data/uploads/svg data/uploads/fonts
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
     CMD curl -fsS http://127.0.0.1:${PORT:-4263}/health || exit 1
