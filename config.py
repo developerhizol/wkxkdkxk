@@ -5,11 +5,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# ─── Из .env ─────────────────────────────────────────────────────────
 BOT_TOKEN = os.getenv("BOT_TOKEN", "")
 CRYPTO_PAY_TOKEN = os.getenv("CRYPTO_PAY_TOKEN", "")
 
-# ─── Статичные константы ─────────────────────────────────────────────
 ADMIN_ID = 7752488661
 
 STARS_PER_EMOJI = 1
@@ -27,7 +25,6 @@ CHANNEL_URL = f"https://t.me/{CHANNEL_USERNAME}"
 
 CRYPTO_PAY_API_URL = "https://pay.crypt.bot/api"
 
-# ─── Наборы-шаблоны ──────────────────────────────────────────────────
 TEMPLATE_SETS = {
     "color":      "color_by_animatedemojimakerbot",
     "exclusive":  "exclusive_by_animatedemojimakerbot",
@@ -39,23 +36,17 @@ TEMPLATE_SETS = {
 SKIP_COLOR_PACKS = {"color", "exclusive", "pepe"}
 PASSPORT_PACK = "passport"
 
-# ─── WebApp URL ──────────────────────────────────────────────────────
 WEBAPP_URL = "https://animatedemojimaker.bothost.tech"
 
-# ─── Локальный bind для uvicorn ──────────────────────────────────────
 WEBAPP_HOST = "0.0.0.0"
 WEBAPP_PORT = int(os.getenv("PORT", "4263"))
 
-# ─── Суффикс имени пака ──────────────────────────────────────────────
+
 def pack_name_suffix(bot_username: str) -> str:
-    """
-    Telegram требует, чтобы имя стикерпака заканчивалось на _by_<bot_username>.
-    Вычисляем из реального username бота, а не хардкодим.
-    """
     username = (bot_username or "").lower()
     return f"_by_{username}" if username else "_by_bot"
 
-# ─── Пути ────────────────────────────────────────────────────────────
+
 DATA_DIR = Path("data")
 UPLOAD_DIR = DATA_DIR / "uploads"
 SVG_DIR = UPLOAD_DIR / "svg"
