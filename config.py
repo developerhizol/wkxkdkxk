@@ -45,6 +45,11 @@ PASSPORT_PACK = "passport"
 # ─── WebApp URL ──────────────────────────────────────────────────────
 WEBAPP_URL = "https://animatedemojimaker.bothost.tech"
 
+# ─── Локальный bind (для uvicorn / systemd) ──────────────────────────
+# Наружу этот порт НЕ открывай — только nginx/Caddy проксирует на него.
+WEBAPP_HOST = "127.0.0.1"
+WEBAPP_PORT = 4263
+
 # ─── Пути ────────────────────────────────────────────────────────────
 DATA_DIR = Path("data")
 UPLOAD_DIR = DATA_DIR / "uploads"
